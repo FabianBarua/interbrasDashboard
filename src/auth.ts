@@ -1,5 +1,7 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import GitHubProvider from "next-auth/providers/github";
+
 import { LOGIN } from "./lib/routes";
 
 export const {
@@ -20,6 +22,10 @@ export const {
                 },
             },
         }),
+        GitHubProvider({
+    clientId: process.env.GITHUB_ID,
+    clientSecret: process.env.GITHUB_SECRET
+  })
     ],
     pages: {
         signIn: LOGIN,
@@ -33,7 +39,6 @@ export const {
         },
         async signIn({ user, account, profile, email, credentials }) {
             console.log("signIn", user, account, profile, email, credentials)
-
             return true
 
         },
