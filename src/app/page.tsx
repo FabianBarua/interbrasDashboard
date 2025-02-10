@@ -4,35 +4,42 @@ import { LOGIN } from "@/lib/routes";
 import Image from "next/image";
 import Link from "next/link";
 
+const LoggedScreen = async (session) => {
+  return (
+    <div>
+      <h1>Welcome, {session?.user?.name}</h1>
+      <p>You are logged in!</p>
+      <pre>
+          <code>{JSON.stringify(session, null, 2)}</code>
+      </pre>
+      <Image
+          src={session?.user?.image}
+          alt={session?.user?.name}
+          width={72}
+          height={72}
+          className="rounded-full"
+      />
+      <Logout />
+    </div>
+  )
+}
+
+const NotLoggedScreen = () => {
+  return (
+    <div>
+      <h1>Inicia session</h1>
+      <Link href={LOGIN}>
+          Sign In
+      </Link>
+    </div>
+  )
+}
+
 export default async function Home() {
   const session = await auth();
   return (
-    <div className="flex flex-col justify-center items-center m-4">
-        {session?.user ? (
-          <div>
-            <h1 className="text-3xl my-2">Welcome, {session?.user?.name}</h1>
-            <p className="text-lg my-2">You are logged in!</p>
-            <pre>
-                <code>{JSON.stringify(session, null, 2)}</code>
-            </pre>
-            <Image
-                src={session?.user?.image}
-                alt={session?.user?.name}
-                width={72}
-                height={72}
-                className="rounded-full"
-            />
-            <Logout />
-          </div>
-        ) : 
-        <div>
-          <h1 className="text-3xl my-3">Hey, time to Sign In</h1>
-          <Link href={LOGIN}>
-              Sign In
-          </Link>
-        </div>
-        }
-
-    </div>
+    <>
+        {session?.user ? LoggedScreen(session) : NotLoggedScreen()}
+    </>
   )
 }
