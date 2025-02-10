@@ -9,12 +9,8 @@ export async function middleware(request) {
 
   const isAuthenticated = !!session?.user;
 
-  console.log(isAuthenticated, nextUrl.pathname);
-
   const isPublicRoute = ((PUBLIC_ROUTES.find(route => nextUrl.pathname.startsWith(route))
   || nextUrl.pathname === ROOT) && !PROTECTED_SUB_ROUTES.find(route => nextUrl.pathname.includes(route)));
-
-  console.log(isPublicRoute);
 
   if (!isAuthenticated && !isPublicRoute){
     let callbackUrl = nextUrl.pathname;
