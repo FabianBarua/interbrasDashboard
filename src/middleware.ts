@@ -23,7 +23,7 @@ export async function middleware(request) {
     }
     const encodedCallbackUrl = encodeURIComponent(callbackUrl);
     return Response.redirect(
-      new URL(`/login?callbackUrl=${encodedCallbackUrl}`, nextUrl)
+      new URL(`${LOGIN}?callbackUrl=${encodedCallbackUrl}`, nextUrl)
     );
   }
 }

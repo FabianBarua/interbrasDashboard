@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import Logout from "@/components/Logout";
+import { LOGIN } from "@/lib/routes";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -26,7 +27,7 @@ export default async function Home() {
         ) : 
         <div>
           <h1 className="text-3xl my-3">Hey, time to Sign In</h1>
-          <Link href="/login">
+          <Link href={LOGIN}>
               Sign In
           </Link>
         </div>

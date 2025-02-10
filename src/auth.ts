@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import { LOGIN } from "./lib/routes";
 
 export const {
     handlers: { GET, POST },
@@ -21,16 +22,21 @@ export const {
         }),
     ],
     pages: {
-        signIn: "/login",
+        signIn: LOGIN,
     },
     callbacks: {
         async session({ session }) {
-
             if (session.user) {
-              session.user.role = "user";
+                session.user.role = "user";
             }
-      
             return session;
-          },
-    }
+        },
+        async signIn({ user, account, profile, email, credentials }) {
+            console.log("signIn", user, account, profile, email, credentials)
+
+            return true
+
+        },
+    },
+    trustHost: true,
 });
