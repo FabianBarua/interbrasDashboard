@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
+import {HeroUIProvider} from "@heroui/react";
 import { auth } from "@/auth";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
@@ -24,10 +25,12 @@ export default async function RootLayout({
 
   return (
     <SessionProvider session={session}>
-      <html lang="en">
-        <body className={inter.className}>
+      <html lang="en" className="dark">
+        <body className={`  min-h-dvh flex flex-col  ${inter.className}`}>
           <Toaster />
-          {children}
+          <HeroUIProvider className="  ">
+            {children}
+          </HeroUIProvider>
         </body>
       </html>
     </SessionProvider>

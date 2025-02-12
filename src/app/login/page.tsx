@@ -1,7 +1,8 @@
-import LoginForm  from "@/components/LoginForm";
+'use server';
+import { LoginPage } from '@/components/Login';
 
-const LoginPage = () => {
-  return <LoginForm />;
+const Login = () => {
+  return <LoginPage />;
 };
 
-export default LoginPage;
+export default Login;
