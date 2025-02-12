@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: false,
   },
   pageExtensions: ['ts', 'tsx'],
+  crossOrigin: 'anonymous',
   images: {
     remotePatterns: [
       {
