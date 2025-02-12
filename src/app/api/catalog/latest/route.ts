@@ -33,16 +33,19 @@ interface GroupedByCategory {
   };
 }
 
+const allowedOrigins = ['https://interbrasoficial.com', 'http://localhost:4321'];
+
+
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const currentLocale  = searchParams.getAll('lang') || 'es';
 
-    // const i18n = getI18NProducts({ currentLocale });
-    // const i18n_catalog = getI18NCatalog({ currentLocale });
-    
-    // const t = (key: string) => getValueFromKey(key, i18n);
-    // const t_catalog = (key: string) => getValueFromKey(key, i18n_catalog);
-    
+    const origin = request.headers.get('Origin');
+
+    if (!allowedOrigins.includes(origin)) {
+      return NextResponse.json({ message: 'Origin not allowed' }, { status: 403 });
+    }
+
     const t = (key: string) => key;
     const t_catalog = (key: string) => key;
 
@@ -175,6 +178,9 @@ export async function GET(request: NextRequest) {
     {
       headers: {
         'Cache-Control': 'no-store',
+        'Access-Control-Allow-Origin': origin,
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
       },
     }
   );
