@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  pageExtensions: ['ts', 'tsx'],
   images: {
     remotePatterns: [
       {

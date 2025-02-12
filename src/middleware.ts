@@ -3,7 +3,8 @@ import { auth } from "@/auth";
 
 export async function middleware(request) {
   const { nextUrl } = request;
-  const isLoggedIn = !!request.auth;
+
+  console.log('test')
 
   const session = await auth();
 
@@ -25,5 +26,5 @@ export async function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"]
+  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", '/api/:path*']
 };

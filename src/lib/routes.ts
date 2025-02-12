@@ -8,6 +8,7 @@ export const PUBLIC_ROUTES = [
     '/products',
     '/api/auth/callback/google',
     '/api/auth/callback/github',
+    '/api/catalog/latest'
 ]
 
 export const PROTECTED_SUB_ROUTES = [
