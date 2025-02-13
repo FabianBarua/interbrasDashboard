@@ -1,13 +1,14 @@
 import { auth } from "@/auth";
 import { LOGIN } from "@/lib/routes";
-import { Button, Card, CardBody, CardHeader, Divider } from "@heroui/react";
+import { Button, Card, CardHeader } from "@heroui/react";
 import Link from "next/link";
 import { doLogout } from "./actions";
 import Image from "next/image";
 import { CircleAlert } from "lucide-react";
 import { ROLES } from "@/lib/constants";
+import { NotLoggedScreen } from "@/components/NotLoggedScreen";
 
-const LoggedScreen = async (session) => {
+const LoggedScreen = (session) => {
 
   const isAdmin = session?.user?.role === ROLES.ADMIN
 
@@ -64,34 +65,18 @@ const LoggedScreen = async (session) => {
   )
 }
 
-const NotLoggedScreen = () => {
-  return (
-    <Card className=" pt-5 px-5 pb-4  border border-content2">
-      <CardHeader className=" flex-col max-w-60">
-
-      <h1 className=" text-xl font-medium">Inicia sesión</h1>
-      <p className="text-small text-default-500 text-center leading-4 mt-3">
-          Inicia sesión con una cuenta autorizada
-      </p>
-      </CardHeader>
-
-      <CardBody>
-        <Link className=" w-full flex-1 flex-shrink-0 flex-grow-0 flex" href={LOGIN}>
-          <Button color="primary" className=" w-full">
-            Login
-          </Button>
-        </Link>
-      </CardBody>
-    </Card>
-  )
-}
-
 export default async function Home() {
   const session = await auth();
   return (
     <>
     <div className=" min-h-dvh  flex flex-col justify-center items-center gap-4">
-        {session?.user ? LoggedScreen(session) : NotLoggedScreen()}
+        {session?.user ? 
+        <>
+          {
+            LoggedScreen(session)
+          }
+        </> 
+        : <NotLoggedScreen />}
     </div>
     </>
   )

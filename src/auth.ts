@@ -34,13 +34,14 @@ export const {
         async session({ session }) {
             if (session.user) {
                 session.user.role = "user";
+                console.log('image', session.user.image)
+                session.user.image = session.user.image || `https://api.dicebear.com/9.x/thumbs/svg?seed=${session.user.name || "user"}`;
             }
             return session;
         },
         async signIn({ user, account, profile, email, credentials }) {
             console.log("signIn", user, account, profile, email, credentials)
             return true
-
         },
     },
     trustHost: true,
