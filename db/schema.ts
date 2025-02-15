@@ -1,4 +1,5 @@
 import { int, sqliteTable, text, real } from "drizzle-orm/sqlite-core";
+export * from './schemaAuth';
 
 export const Category = sqliteTable("category", {
   id: text().primaryKey().notNull(),

@@ -6,8 +6,6 @@ import { auth } from "@/auth";
 export async function middleware(request) {
   const { nextUrl } = request;
 
-  console.log('test')
-
   const session = await auth();
 
   const isAuthenticated = !!session?.user;

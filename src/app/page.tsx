@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { LOGIN } from "@/lib/routes";
-import { Button, Card, CardHeader } from "@heroui/react";
+import { Button} from "@heroui/react";
 import Link from "next/link";
 import { doLogout } from "./actions";
 import Image from "next/image";
@@ -36,11 +36,16 @@ const LoggedScreen = (session) => {
       
       {
         isAdmin && (
-          <Link className=" w-full" href="/admin">
-            <Button  className=" w-full" color="primary" type="submit">
-              Menu
+
+            <Button 
+              as={Link}
+              href="/admin"
+            className=" w-full"
+            color="primary"
+            type="submit"
+            >
+                            Menu
             </Button>
-          </Link>
         )
       }
 

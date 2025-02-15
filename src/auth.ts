@@ -1,8 +1,14 @@
+import { LOGIN } from "./lib/routes";
 import NextAuth from "next-auth";
+
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 
-import { LOGIN } from "./lib/routes";
+import { Adapter } from "next-auth/adapters";
+import { DrizzleAdapter } from "@auth/drizzle-adapter"
+import { Accounts, db, Sessions, Users, VerificationTokens } from "@root/db/config";
+import { Role } from "./next-auth";
+
 
 export const {
     handlers: { GET, POST },
@@ -27,22 +33,28 @@ export const {
     clientSecret: process.env.GITHUB_SECRET
   })
     ],
+    session: {
+        strategy: "jwt",
+    },
     pages: {
         signIn: LOGIN,
     },
     callbacks: {
-        async session({ session }) {
-            if (session.user) {
-                session.user.role = "user";
-                console.log('image', session.user.image)
-                session.user.image = session.user.image || `https://api.dicebear.com/9.x/thumbs/svg?seed=${session.user.name || "user"}`;
-            }
-            return session;
+        async session({ session, token }) {
+            session.user.role = token.role as Role;
+            session.user.image = session.user.image || `https://api.dicebear.com/9.x/thumbs/png?seed=${session.user.name || "user"}`;
+            return session
         },
-        async signIn({ user, account, profile, email, credentials }) {
-            console.log("signIn", user, account, profile, email, credentials)
-            return true
+        jwt({ token, user }) {
+            if(user) token.role = user.role
+            return token
         },
     },
     trustHost: true,
+    adapter : DrizzleAdapter(db, {
+        usersTable: Users,
+        accountsTable: Accounts,
+        sessionsTable: Sessions,
+        verificationTokensTable: VerificationTokens,
+      }) as Adapter,
 });

@@ -22,9 +22,12 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const session = await auth();
-
   return (
-    <SessionProvider session={session}>
+    <SessionProvider session={session}
+      refetchOnWindowFocus={false}
+      refetchWhenOffline={false}
+      refetchInterval={0}
+    >
       <html lang="en" className="dark">
         <body className={`  min-h-dvh flex flex-col  ${inter.className}`}>
           <Toaster />

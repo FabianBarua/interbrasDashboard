@@ -1,4 +1,5 @@
 import { drizzle } from 'drizzle-orm/libsql';
+export * from './schemaAuth';
 
 const { DATABASE_URL, DATABASE_AUTH_TOKEN } = process.env;
 
