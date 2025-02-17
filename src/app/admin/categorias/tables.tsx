@@ -230,6 +230,7 @@ export const CustomTable = () => {
                     console.log(keys)
                 }
                 }
+                className=" pb-4"
             >
                 <TableHeader>
                     {columns.map((column) => <TableColumn key={column.key}>{column.label}</TableColumn>)}
