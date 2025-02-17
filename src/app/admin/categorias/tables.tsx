@@ -28,13 +28,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
-import { getData } from "./api";
-
-const fakeDelete = async (id: string | string[]) => {
-    console.log('Deleting', id)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    return true
-}
+import { fakeDelete, getData } from "./api";
 
 const DeleteCategoryModal = ({ isOpen, onOpenChange, category, onDelete }: any) => {
     return (

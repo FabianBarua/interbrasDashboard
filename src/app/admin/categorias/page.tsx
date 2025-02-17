@@ -1,7 +1,5 @@
 'use server'
 import Head from 'next/head';
-import { db } from "@root/db/config";
-import { Category } from "@root/db/schema";
 import { Metadata } from 'next';
 import { CustomTable } from './tables';
 
