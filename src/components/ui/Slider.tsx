@@ -175,14 +175,14 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
         >
 
 
-        {items.map((item) => (
+        {items.map((item, i) => (
           item.items ? (
             <ListboxSection
-              key={`${isCompact ? 'compact' : 'default'}-${customLabel}-${Date.now()}`}
+              key={`${isCompact ? 'compact' : 'default'}-${customLabel}-${i}`}
               title={item.title}
               classNames={sectionClasses}
             >
-              {item.items.map((subItem, index) => renderItem({ ...subItem, key: `${item.key}-${index}` }))}
+              {item.items.map((subItem) => renderItem({ ...subItem }))}
             </ListboxSection>
           ) : (
             renderItem(item)

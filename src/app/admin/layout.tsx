@@ -13,7 +13,7 @@ import { useMediaQuery } from "usehooks-ts";
 import { trainerSidebarItems, trainerSidebarItemsSecondary } from "@/components/ui/items";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 
 type AppLayoutProps = {
@@ -21,7 +21,7 @@ type AppLayoutProps = {
     title: string;
     subtitle: string;
   };
-  
+
   export default function AppLayout({
     children
   }: AppLayoutProps) {
@@ -34,10 +34,13 @@ type AppLayoutProps = {
     }, []);
     
     const session = useSession()
-
+    const router = useRouter()
+    
     const pathname = usePathname();
     const key = pathname.split("/")[2] || trainerSidebarItems[0].key
     const [keySelected, setKeySelected] = useState(trainerSidebarItems.find((item) => item.key === key) || trainerSidebarItemsSecondary.find((item) => item.key === key));
+
+    const isSubMenu = pathname.split("/")[3] !== undefined
 
     useEffect(() => {
       setKeySelected(trainerSidebarItems.find((item) => item.key === key) || trainerSidebarItemsSecondary.find((item) => item.key === key));
@@ -47,7 +50,7 @@ type AppLayoutProps = {
       <div className="flex h-dvh w-full gap-4">
         {/* Sidebar */}
         <SidebarDrawer
-          className={cn("min-w-[288px] rounded-lg", {
+          className={cn("min-w-[288px] rounded-lg ", {
             "min-w-[76px]": isCollapsed,
           })}
           hideCloseButton={true}
@@ -56,7 +59,7 @@ type AppLayoutProps = {
         >
           <div
             className={cn(
-              "will-change relative flex h-full w-72 flex-col bg-default-100 p-6 transition-width",
+              "will-change relative flex h-full w-72 flex-col bg-default-100 p-6 transition-width ",
               {
                 "w-[83px] items-center px-[6px] py-6": isCollapsed,
               }
@@ -89,35 +92,39 @@ type AppLayoutProps = {
               </div>
             </div>
   
+            <div className=" overflow-y-auto hideScroll">
             <Spacer y={6} />
   
-            <Sidebar
-              iconClassName="group-data-[selected=true]:text-default-50"
-              isCompact={isCollapsed}
-              itemClasses={{
-                base: "px-3 rounded-large data-[selected=true]:!bg-foreground",
-                title: "group-data-[selected=true]:text-default-50",
-              }}
-              items={trainerSidebarItems}
-              keySelected={keySelected}
-              customLabel="primary"
-            />
+              <Sidebar
+                iconClassName="group-data-[selected=true]:text-default-50"
+                isCompact={isCollapsed}
+                itemClasses={{
+                  base: "px-3 rounded-large data-[selected=true]:!bg-foreground",
+                  title: "group-data-[selected=true]:text-default-50",
+                }}
+                items={trainerSidebarItems}
+                keySelected={keySelected}
+                customLabel="primary"
+              />
 
-            <Spacer y={3} />
+              <Spacer y={3} />
 
-            <Sidebar
-              iconClassName="group-data-[selected=true]:text-default-50"
-              isCompact={isCollapsed}
-              itemClasses={{
-                base: "px-3 rounded-large data-[selected=true]:!bg-foreground",
-                title: "group-data-[selected=true]:text-default-50",
-              }}
-              items={trainerSidebarItemsSecondary}
-              keySelected={keySelected}
-              customLabel="secondary"
-            />
-  
-            <Spacer y={8} />
+              <Sidebar
+                iconClassName="group-data-[selected=true]:text-default-50"
+                isCompact={isCollapsed}
+                itemClasses={{
+                  base: "px-3 rounded-large data-[selected=true]:!bg-foreground",
+                  title: "group-data-[selected=true]:text-default-50",
+                }}
+                items={trainerSidebarItemsSecondary}
+                keySelected={keySelected}
+                customLabel="i18n"
+              />
+
+
+              <Spacer y={8} />
+
+            </div>
   
             <div
               className={cn("mt-auto flex flex-col", {
@@ -177,45 +184,61 @@ type AppLayoutProps = {
           </div>
         </SidebarDrawer>
   
-        {/*  Content */}
-        <div className="w-full max-w-screen-2xl flex-1 p-4 mx-auto flex flex-col">
-          {/* Title */}
-          <div className="flex items-center gap-x-3">
-            <Button
-              isIconOnly
-              className="sm:hidden"
-              size="sm"
-              variant="flat"
-              onPress={onOpenChange}
-            >
-              <ChevronRight
-                className="text-default-500"
-                width={20}
-              />
-            </Button>
-            <h1 className="text-3xl font-bold leading-9 text-default-foreground">
-              {
-                keySelected.title
-              }
-            </h1>
-          
-              {
-                keySelected.key !== 'dashboard' && (
-                  <Button
-                    href="/admin"
-                    variant="flat"
-                    as={Link}
-                    className=" ml-auto"
-                  >
-                    Cerrar <X height={18}/>
-                  </Button>
-                )
-              }
-          </div>
+        <div  className=" overflow-auto w-full hideScroll">
+          {/*  Content */}
+          <div className="w-full max-w-screen-2xl flex-1 p-4 mx-auto flex flex-col  h-full ">
+            {/* Title */}
+            <div className="flex items-center gap-x-3">
+              <Button
+                isIconOnly
+                className="sm:hidden"
+                size="sm"
+                variant="flat"
+                onPress={onOpenChange}
+              >
+                <ChevronRight
+                  className="text-default-500"
+                  width={20}
+                />
+              </Button>
+              <h1 className="text-3xl font-bold leading-9 text-default-foreground">
+                {
+                  keySelected.title
+                }
+              </h1>
+            
+                {
+                  keySelected.key !== 'dashboard' && (
+                    <Button
+                      href={
+                        isSubMenu ?  undefined : '/admin'
+                      }
+                      variant="flat"
+                      as={
+                        isSubMenu ? 'button' : Link
+                      }
+                      onPress={
+                        isSubMenu ? router.back : undefined
+                      }
+                      className=" ml-auto"
+                    >
+                      {
+                        isSubMenu ? <>
+                        Volver <ChevronLeft height={18}/>
+                        </>: <>
+                        Cerrar <X height={18}/>
+                        </>
+                      }
+                    </Button>
+                  )
+                }
 
-        
-          <>{children}</>
-        </div>
+                
+            </div>
+            {children}
+
+          </div>
+        </div >
       </div>
     );
   }

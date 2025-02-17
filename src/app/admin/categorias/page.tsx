@@ -1,10 +1,9 @@
 'use server'
 import Head from 'next/head';
 import { db } from "@root/db/config";
-import { Category, Product } from "@root/db/schema";
+import { Category } from "@root/db/schema";
 import { Metadata } from 'next';
-import { ProductsTable } from './tables';
-import { eq } from 'drizzle-orm';
+import { CustomTable } from './tables';
 
 export async function metadata (): Promise<Metadata> {
   return {
@@ -13,11 +12,7 @@ export async function metadata (): Promise<Metadata> {
 }
 
 export default async function Page() {
-    const products = await 
-      db.select()
-      .from(Product)
-      .fullJoin(Category, eq(Product.category_id, Category.id))
-      
+  
     const categories = await db.select().from(Category)
 
     return (
@@ -25,9 +20,8 @@ export default async function Page() {
         <Head>
           <title>Productos</title>
         </Head>
-        
-        <ProductsTable 
-          products={products}
+
+        <CustomTable 
           categories={categories}
         />
     

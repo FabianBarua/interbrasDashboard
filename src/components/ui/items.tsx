@@ -12,6 +12,11 @@ export const trainerSidebarItems: SidebarItem[] = [
     title: "Dashboard",
   },
   {
+    key: "categorias",
+    href: "/admin/categorias",
+    icon: "solar:layers-minimalistic-outline",
+    title: "Categorias",
+  },  {
     key: "productos",
     href: "/admin/productos",
     icon: "solar:box-outline",
