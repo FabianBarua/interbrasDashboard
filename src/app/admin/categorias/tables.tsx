@@ -66,8 +66,6 @@ const DeleteCategoryModal = ({ isOpen, onOpenChange, category, onDelete }: any) 
 
 export const CustomTable = ({ categories: categoriesFromServer }: { categories: typeof Category.$inferSelect[] }) => {
 
-    
-    
     const [categories, setCategories] = useState<typeof Category.$inferSelect[]>(categoriesFromServer)
 
     const columns = [
@@ -93,6 +91,8 @@ export const CustomTable = ({ categories: categoriesFromServer }: { categories: 
                 fakeDelete(categoryToDelete.id).then((success) => {
                     if (success) {
                         setCategories((categories) => categories.filter((c) => c.id !== categoryToDelete.id));
+                        setSelectedKeys((prev)=> new Set([...prev].filter((key) => key !== categoryToDelete.id)));
+                        setCategoryToDelete(null);
                         onClose();
                     }
                 }),
@@ -114,7 +114,7 @@ export const CustomTable = ({ categories: categoriesFromServer }: { categories: 
             (categoriesFromServer.length > 0)
         );
     } , [categoriesFromServer]);
-    
+
     if (!loaded) {
         return <div className=" mx-auto my-auto flex gap-2 items-center justify-center">
             <Loader size={20}  className=" animate-spin text-primary-500 "/> 
@@ -123,7 +123,6 @@ export const CustomTable = ({ categories: categoriesFromServer }: { categories: 
             </p>
         </div>;
     }
-
 
     return (
         <>
