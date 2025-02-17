@@ -13,17 +13,13 @@ export async function metadata (): Promise<Metadata> {
 
 export default async function Page() {
   
-    const categories = await db.select().from(Category)
-
     return (
       <>
         <Head>
           <title>Productos</title>
         </Head>
 
-        <CustomTable 
-          categories={categories}
-        />
+        <CustomTable />
     
       </>
     );
