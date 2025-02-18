@@ -2,11 +2,39 @@
 import { Button, ButtonGroup, Divider, Input, Textarea } from "@heroui/react"
 import { Icon } from "@iconify/react"
 import { useParams, useRouter } from 'next/navigation'
-import { fakeDelete, getData } from "../../api"
-import { Category } from "@root/db/schema"
+import { categoryTranslated, deleteCategories, saveData } from "../../api"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { Trash, Undo2, Save } from "lucide-react"
+import { getData } from "./api"
+import { LANGUAGES } from "@/lib/constants"
+
+const INITIAL_STATE: categoryTranslated = {
+    [LANGUAGES.ES]: {
+        lang: LANGUAGES.ES,
+        data: [
+            {
+                id: "",
+                category_id: "",
+                name: "",
+                description: "",
+                shortDescription: ""
+            }
+        ]
+    },
+    [LANGUAGES.PT]: {
+        lang: LANGUAGES.PT,
+        data: [
+            {
+                id: "",
+                category_id: "",
+                name: "",
+                description: "",
+                shortDescription: ""
+            }
+        ]
+    }
+}
 
 export default function Page() {
 
@@ -14,31 +42,37 @@ export default function Page() {
 
     const id = params.id
 
-    const [originalCategory, setOriginalCategory] = useState<typeof Category.$inferSelect >({
-        id: "",
-        name: "",
-        shortDescription: "",
-        description: "",
-    })
+    const [originalCategory, setOriginalCategory] = useState<categoryTranslated >(INITIAL_STATE)
+    const [category, setCategory] = useState<categoryTranslated>(INITIAL_STATE)
 
-    const [category, setCategory] = useState<typeof Category.$inferSelect >({
-        id: "",
-        name: "",
-        shortDescription: "",
-        description: "",
-    })
 
     useEffect (() => {
-        getData({id}).then((category) => {
-            setOriginalCategory(category[0])
-            setCategory(category[0])
+        getData({id, lang:['es', 'pt']}).then((category) => {
+            // add the category to the state
+            setCategory(category)
+            setOriginalCategory(category)
+            console.log(category)
         })
     }, [] )
 
+    
+    const handleSave = async () => {
+        toast.promise(saveData(category).then(
+            (success) => {
+                if(success){
+                    setOriginalCategory(category)
+                }
+            }
+        ), {
+            loading: "Guardando cambios",
+            success: "Cambios guardados",
+            error: "Error al guardar cambios"
+        })
+    }
 
     const router = useRouter()
     const handleDelete = async () => {
-        toast.promise(fakeDelete(id).then(
+        toast.promise(deleteCategories(id).then(
             (success)=>{
                 if(success){
                     router.push("/admin/categorias")
@@ -87,6 +121,7 @@ export default function Page() {
                         </Button>                  
                         <Button
                         variant="flat"
+                        onPress={handleSave}
                         >
                             Guardar
                             <Save className=" ml-2" size={20} />
@@ -97,8 +132,6 @@ export default function Page() {
 
             </div>
             
-
-
             <div className=" flex flex-col gap-2 w-full ">
 
                 <div className=" flex justify-center items-center w-full  gap-4 ">
@@ -114,23 +147,79 @@ export default function Page() {
                 <Input
                     label="Nombre"
                     labelPlacement="inside"
-                    value={category.name}
-                    onChange={(e) => setCategory({ ...category, name: e.target.value })}
+                    value={
+                        category ?
+                        category[LANGUAGES.ES].data[0].name
+                        : undefined
+                    }
+                    onChange={(e) => setCategory(
+                        {
+                            ...category,
+                            [LANGUAGES.ES]: {
+                                lang: LANGUAGES.ES,
+                                data: [
+                                    {
+                                        ...category[LANGUAGES.ES].data[0],
+                                        name: e.target.value
+                                    }
+                                ]
+                            }
+                        }
+                    )
+                }
                 >
                 </Input>
 
-                <Textarea
+                <Input
                     label="Descripcion corta"
                     labelPlacement="inside"
-                    value={category.shortDescription}
-                    onChange={(e) => setCategory({ ...category, shortDescription: e.target.value })}
+                    value={
+                        category ?
+                        category[LANGUAGES.ES].data[0].shortDescription
+                        : undefined
+                    }
+                    onChange={
+                        (e) => setCategory(
+                            {
+                                ...category,
+                                [LANGUAGES.ES]: {
+                                    lang: LANGUAGES.ES,
+                                    data: [
+                                        {
+                                            ...category[LANGUAGES.ES].data[0],
+                                            shortDescription: e.target.value
+                                        }
+                                    ]
+                                }
+                            }
+                        )
+                    }
                 />
 
                 <Textarea
                     label="Descripcion"
                     labelPlacement="inside"
-                    value={category.description}
-                    onChange={(e) => setCategory({ ...category, description: e.target.value })}
+                    value={
+                        category ?
+                        category[LANGUAGES.ES].data[0].description
+                        : undefined
+                    }
+                    onChange={
+                        (e) => setCategory(
+                            {
+                                ...category,
+                                [LANGUAGES.ES]: {
+                                    lang: LANGUAGES.ES,
+                                    data: [
+                                        {
+                                            ...category[LANGUAGES.ES].data[0],
+                                            description: e.target.value
+                                        }
+                                    ]
+                                }
+                            }
+                        )
+                    }
                 />
 
                 <div className=" flex justify-center items-center w-full  gap-4 ">
@@ -146,23 +235,79 @@ export default function Page() {
                 <Input
                     label="Nombre"
                     labelPlacement="inside"
-                    value={category.name}
-                    onChange={(e) => setCategory({ ...category, name: e.target.value })}
+                    value={
+                        category ?
+                        category[LANGUAGES.PT].data[0].name
+                        : undefined
+                    }
+                    onChange={(e) => setCategory(
+                        {
+                            ...category,
+                            [LANGUAGES.PT]: {
+                                lang: LANGUAGES.PT,
+                                data: [
+                                    {
+                                        ...category[LANGUAGES.PT].data[0],
+                                        name: e.target.value
+                                    }
+                                ]
+                            }
+                        }
+                    )
+                }
                 >
                 </Input>
 
-                <Textarea
+                <Input
                     label="Descripcion corta"
                     labelPlacement="inside"
-                    value={category.shortDescription}
-                    onChange={(e) => setCategory({ ...category, shortDescription: e.target.value })}
+                    value={
+                        category ?
+                        category[LANGUAGES.PT].data[0].shortDescription
+                        : undefined
+                    }
+                    onChange={
+                        (e) => setCategory(
+                            {
+                                ...category,
+                                [LANGUAGES.PT]: {
+                                    lang: LANGUAGES.PT,
+                                    data: [
+                                        {
+                                            ...category[LANGUAGES.PT].data[0],
+                                            shortDescription: e.target.value
+                                        }
+                                    ]
+                                }
+                            }
+                        )
+                    }
                 />
 
                 <Textarea
                     label="Descripcion"
                     labelPlacement="inside"
-                    value={category.description}
-                    onChange={(e) => setCategory({ ...category, description: e.target.value })}
+                    value={
+                        category ?
+                        category[LANGUAGES.PT].data[0].description
+                        : undefined
+                    }
+                    onChange={
+                        (e) => setCategory(
+                            {
+                                ...category,
+                                [LANGUAGES.PT]: {
+                                    lang: LANGUAGES.PT,
+                                    data: [
+                                        {
+                                            ...category[LANGUAGES.PT].data[0],
+                                            description: e.target.value
+                                        }
+                                    ]
+                                }
+                            }
+                        )
+                    }
                 />
                 
             </div>

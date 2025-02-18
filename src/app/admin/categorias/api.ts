@@ -1,19 +1,150 @@
-'use server'
+"use server";
 
-import { db } from "@root/db/config"
-import { Category } from "@root/db/schema"
-import { and, eq } from "drizzle-orm"
+import { DEFAULT_LANGUAGE, LANGUAGES } from "@/lib/constants";
+import { db } from "@root/db/config";
+import { Category, CategoryTranslation } from "@root/db/schema";
+import { and, eq, inArray } from "drizzle-orm";
 
-export const getData = async (params?: { id?: string }) => {
-    const filters= []
-    if (params?.id) {
-        filters.push(eq(Category.id, params.id))
+export interface CategoryData {
+  id: string;
+  name: string;
+  description: string;
+  shortDescription: string;
+}
+export interface categoryTranslated {
+  [lang: string]: {
+    lang: string;
+    data: {
+      id: string | null;
+      category_id: string;
+      name: string;
+      description: string;
+      shortDescription: string;
+    }[];
+  };
+}
+
+export const getData = async (params?: {
+  id?: string;
+  lang: string;
+}): Promise<CategoryData[]> => {
+  const filters = [];
+
+  if (params?.id) {
+    filters.push(eq(Category.id, params.id));
+  }
+
+  const lang = params?.lang || DEFAULT_LANGUAGE;
+
+  const result = db
+    .select({
+      id: Category.id,
+      name: CategoryTranslation.name,
+      description: CategoryTranslation.description,
+      shortDescription: CategoryTranslation.shortDescription,
+    })
+    .from(Category)
+    .fullJoin(
+      CategoryTranslation,
+      eq(CategoryTranslation.category_id, Category.id)
+    )
+    .where(and(eq(CategoryTranslation.lang, lang), ...filters));
+
+  return await result;
+};
+
+export const deleteCategories = async (id: string | string[]) => {
+  const ids = typeof id === "string" ? [id] : id;
+
+  console.log(ids);
+
+  const result = await db.delete(Category).where(inArray(Category.id, ids));
+
+  return result.rowsAffected > 0;
+};
+
+export const saveData = async (category: categoryTranslated) => {
+  let success = true;
+
+  Object.keys(LANGUAGES).forEach(async (lang) => {
+    const locale = LANGUAGES[lang];
+    const data = category[locale].data;
+    data.forEach(async (item) => {
+      try {
+        const result = await db
+          .update(CategoryTranslation)
+          .set({
+            name: item.name,
+            description: item.description,
+            shortDescription: item.shortDescription,
+          })
+          .where(
+            and(
+              eq(CategoryTranslation.category_id, item.category_id),
+              eq(CategoryTranslation.lang, locale)
+            )
+          );
+
+        success = success === false ? false : result.rowsAffected > 0;
+      } catch (error) {
+        success = false;
+      }
+
+      return success;
+    });
+  });
+
+  if (!success) {
+    throw new Error("Error al guardar los datos");
+  }
+
+  return success;
+};
+
+export const addData = async (category: categoryTranslated) => {
+  let success = true;
+
+  // Obtener todos los ids únicos
+  const all_ids = Object.values(category)
+    .map((item) => item.data.map((i) => i.category_id))
+    .flat()
+    .filter((value, index, self) => self.indexOf(value) === index);
+
+  for (const categoryId of all_ids) {
+    // Verificar si existe
+    const exists = await db.select().from(Category).where(eq(Category.id, categoryId));
+
+    if (exists.length > 0) {
+      throw new Error("Existe una categoría con el mismo id");
     }
-    return await db.select().from(Category).where(and(...filters))
-}
 
-export const fakeDelete = async (id: string | string[]) => {
-    console.log('Deleting', id)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    return true
-}
+    const result = await db.insert(Category).values({ id: categoryId });
+    console.log(result);
+  }
+
+  for (const lang of Object.keys(LANGUAGES)) {
+    const locale = LANGUAGES[lang];
+    const data = category[locale].data;
+
+    await Promise.all(
+      data.map(async (item) => {
+        const result = await db.insert(CategoryTranslation).values({
+          category_id: item.category_id,
+          lang: locale,
+          name: item.name,
+          description: item.description,
+          shortDescription: item.shortDescription,
+        });
+
+        console.log(result);
+        if (result.rowsAffected === 0) success = false;
+      })
+    );
+  }
+
+  if (!success) {
+    throw new Error("Error al guardar los datos");
+  }
+
+  return success;
+};

@@ -1,54 +1,97 @@
 'use client'
-import { Button, ButtonGroup, Divider, Input, Textarea } from "@heroui/react"
+import { Button, ButtonGroup, Divider, Form, Input, Textarea } from "@heroui/react"
 import { Icon } from "@iconify/react"
-import { useParams, useRouter } from 'next/navigation'
-import { fakeDelete, getData } from "../api"
-import { Category } from "@root/db/schema"
+import { useRouter } from 'next/navigation'
+import { addData, categoryTranslated, saveData } from "../api"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
-import { Trash, Undo2, Save } from "lucide-react"
+
+import { Save } from "lucide-react"
+import { LANGUAGES } from "@/lib/constants"
+
 
 export default function Page() {
 
-
-    const [category, setCategory] = useState<typeof Category.$inferSelect >({
-        id: "",
-        name: "",
-        shortDescription: "",
-        description: "",
-    })
-
-
     const router = useRouter()
 
+    const onSubmit = (e) => {
+        e.preventDefault();
+    
+        const data = Object.fromEntries(new FormData(e.currentTarget));
+
+        const category: categoryTranslated = {
+            [LANGUAGES.ES]: {
+                lang: LANGUAGES.ES,
+                data: [
+                    {
+                        id: null,
+                        category_id: data.id as string,
+                        name: data["name-es"] as string,
+                        description: data["desc-es"] as string,
+                        shortDescription: data["desc-short-es"] as string
+                    }
+                ]
+            },
+            [LANGUAGES.PT]: {
+                lang: LANGUAGES.PT,
+                data: [
+                    {
+                        id: null,
+                        category_id: data.id as string,
+                        name: data["name-pt"] as string,
+                        description: data["desc-pt"] as string,
+                        shortDescription: data["desc-short-pt"] as string
+                    }
+                ]
+            } 
+        }
+
+        addData(category)
+        .then(() => {
+            toast.success("Categoria guardada")
+            router.push("/admin/categorias")
+
+        })
+        .catch(() => {
+            toast.error("Error al guardar")
+        })
+
+        
+      };
 
     return <div className=" h-full  ">
 
-        <div className=" w-full">
-            
-        <div className=" flex justify-between items-center lg:mt-7 lg:mb-5 my-12 flex-col lg:flex-row  gap-3">
+        <Form className=" w-full" validationBehavior="native" onSubmit={onSubmit} >
+
+            <div className=" flex w-full justify-between items-center lg:mt-7 lg:mb-5 my-12 flex-col lg:flex-row  gap-3">
                 <h1 className=" text-2xl font-bold">
                     Agregar categoria
                 </h1>
                 <div className=" flex gap-2">
-  
 
-                    <ButtonGroup>          
+                    <ButtonGroup>
                         <Button
-                        variant="flat"
+                            variant="flat"
+                            type="submit"
                         >
                             Guardar
                             <Save className=" ml-2" size={20} />
                         </Button>
                     </ButtonGroup>
 
-                </div>  
+                </div>
 
             </div>
-            
-
 
             <div className=" flex flex-col gap-2 w-full ">
+
+                <Input
+                    label="ID"
+                    labelPlacement="inside"
+                    name="id"
+                    isRequired
+                >
+                </Input>
 
                 <div className=" flex justify-center items-center w-full  gap-4 ">
                     <h2 className=" text-xl font-semibold my-5">
@@ -63,23 +106,23 @@ export default function Page() {
                 <Input
                     label="Nombre"
                     labelPlacement="inside"
-                    value={category.name}
-                    onChange={(e) => setCategory({ ...category, name: e.target.value })}
+                    name="name-es"
+                    isRequired
                 >
                 </Input>
 
-                <Textarea
+                <Input
                     label="Descripcion corta"
                     labelPlacement="inside"
-                    value={category.shortDescription}
-                    onChange={(e) => setCategory({ ...category, shortDescription: e.target.value })}
+                    name="desc-short-es"
+                    isRequired
                 />
 
                 <Textarea
                     label="Descripcion"
                     labelPlacement="inside"
-                    value={category.description}
-                    onChange={(e) => setCategory({ ...category, description: e.target.value })}
+                    name="desc-es"
+                    isRequired
                 />
 
                 <div className=" flex justify-center items-center w-full  gap-4 ">
@@ -88,36 +131,36 @@ export default function Page() {
                     </h2>
                     <Divider className=" my-7 flex-shrink-0 flex-1 flex-grow w-full" />
                     <div className=" size-[32px] flex-shrink">
-                    <Icon icon="flag:br-4x3" className=" text-2xl" />
+                        <Icon icon="flag:br-4x3" className=" text-2xl" />
                     </div>
                 </div>
 
                 <Input
                     label="Nombre"
                     labelPlacement="inside"
-                    value={category.name}
-                    onChange={(e) => setCategory({ ...category, name: e.target.value })}
+                    name="name-pt"
+                    isRequired
                 >
                 </Input>
 
-                <Textarea
+                <Input
                     label="Descripcion corta"
                     labelPlacement="inside"
-                    value={category.shortDescription}
-                    onChange={(e) => setCategory({ ...category, shortDescription: e.target.value })}
+                    name="desc-short-pt"
+                    isRequired
                 />
 
                 <Textarea
                     label="Descripcion"
                     labelPlacement="inside"
-                    value={category.description}
-                    onChange={(e) => setCategory({ ...category, description: e.target.value })}
+                    name="desc-pt"
+                    isRequired
                 />
-                
+
             </div>
 
 
-        </div>
+        </Form>
 
     </div>
 }

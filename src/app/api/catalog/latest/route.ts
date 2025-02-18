@@ -1,5 +1,5 @@
 import { db } from '@root/db/config';
-import { Catalog, Variant, Product, Volt, Color, Category, Photo } from '@root/db/schema';
+import { Catalog, Variant, Product, Volt, Color, Category, Photo, CategoryTranslation, ColorTranslation, ProductTranslation, StatusTranslation } from '@root/db/schema';
 import { eq, and, min } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -33,12 +33,12 @@ interface GroupedByCategory {
   };
 }
 
-const allowedOrigins = ['https://interbrasoficial.com', 'http://localhost:4321'];
+const allowedOrigins = ['https://interbrasoficial.com', 'http://localhost:4321', null];
 
 
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
-    const currentLocale  = searchParams.getAll('lang') || 'es';
+    const currentLocale  = searchParams.get('lang') || 'es';
 
     const origin = request.headers.get('Origin');
 
@@ -50,7 +50,40 @@ export async function GET(request: NextRequest) {
     const t_catalog = (key: string) => key;
 
     const catalog = await db
-      .select()
+      .select({
+        catalog: {
+          id: Catalog.id,
+          name: Catalog.name,
+          price: Catalog.price,
+          show: Catalog.show,
+          productPerBox: Catalog.productPerBox,
+        },
+        product: {
+          id: Product.id,
+          name: ProductTranslation.name,
+          review: ProductTranslation.review,
+          included: ProductTranslation.included,
+          specs: ProductTranslation.specs,
+        },
+        volt: {
+          id: Volt.id,
+          name: Volt.name,
+        },
+        color: {
+          id: Color.id,
+          color: ColorTranslation.name,
+        },
+        category: {
+          id: Category.id,
+          name: CategoryTranslation.name,
+          description: CategoryTranslation.description,
+          shortDescription: CategoryTranslation.shortDescription,
+        },
+        photo: {
+          url: Photo.url,
+          order: Photo.order,
+        },
+      })
       .from(Catalog)
       .fullJoin(Variant, eq(Variant.catalog_id, Catalog.id))
       .fullJoin(Product, eq(Product.id, Variant.product_id))
@@ -58,6 +91,12 @@ export async function GET(request: NextRequest) {
       .fullJoin(Color, eq(Color.id, Variant.color_id))
       .fullJoin(Category, eq(Category.id, Product.category_id))
       .fullJoin(Photo, eq(Photo.variant_id, Variant.id))
+
+      .fullJoin(CategoryTranslation, eq(CategoryTranslation.category_id, Category.id))
+      .fullJoin(ColorTranslation, eq(ColorTranslation.key, Color.color))
+      .fullJoin(ProductTranslation , eq(ProductTranslation.product_id, Product.id))
+      .fullJoin(StatusTranslation, eq(StatusTranslation.status_id, Catalog.status_id))
+
       .where(
         and(
           eq(
@@ -66,12 +105,26 @@ export async function GET(request: NextRequest) {
               .select({ order: min(Photo.order) })
               .from(Photo)
               .where(eq(Photo.variant_id, Variant.id))
+          ),
+          eq(
+            CategoryTranslation.lang,
+            currentLocale
+          ),
+          eq(
+            ColorTranslation.lang,
+            currentLocale
+          ),
+          eq(
+            ProductTranslation.lang,
+            currentLocale
+          ),
+          eq(
+            StatusTranslation.lang,
+            currentLocale
           )
         )
       );
-    
 
-    
     const groupedByCategory: GroupedByCategory = {};
     
     catalog.forEach((item) => {

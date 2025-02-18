@@ -28,7 +28,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
-import { fakeDelete, getData } from "./api";
+import { CategoryData, deleteCategories, getData } from "./api";
 
 const DeleteCategoryModal = ({ isOpen, onOpenChange, category, onDelete }: any) => {
     return (
@@ -57,19 +57,25 @@ const DeleteCategoryModal = ({ isOpen, onOpenChange, category, onDelete }: any) 
     );
 };
 
+
 export const CustomTable = () => {
 
-    const [categories, setCategories] = useState<typeof Category.$inferSelect[]>([])
-    const updateCategories = ()=>{getData().then((data) => {setCategories(data)})}
+    const [categories, setCategories] = useState<CategoryData[]>([])
+
+    const updateCategories = ()=>{getData().then((data) => {
+        setCategories(data) 
+        console.log(data)
+    })}
 
     useEffect(() => {
         updateCategories()
+        console.log('useEffect')
     }, [])
 
     const [search, setSearch] = useState('')
 
     const categoriesFiltered = useMemo(() => categories.filter((category) => {
-        return category.name.toLowerCase().includes(search.toLowerCase());
+        return category.name?.toLowerCase().includes(search.toLowerCase());
     }), [categories, search])
 
     const columns = [
@@ -92,7 +98,7 @@ export const CustomTable = () => {
     const handleDelete = useCallback(async (onClose: () => void) => {
         if (categoryToDelete) {
             toast.promise(
-                fakeDelete(categoryToDelete.id).then((success) => {
+                deleteCategories(categoryToDelete.id).then((success) => {
                     if (success) {
                         setCategories((categories) => categories.filter((c) => c.id !== categoryToDelete.id));
                         setSelectedKeys((prev) => new Set([...prev].filter((key) => key !== categoryToDelete.id)));
@@ -139,7 +145,7 @@ export const CustomTable = () => {
     const bulkDelete = async () => {
         if (selectedKeys === 'all') {
             toast.promise(
-                fakeDelete('all').then((success) => {
+                deleteCategories('all').then((success) => {
                     if (success) {
                         setCategories([]);
                         setSelectedKeys(new Set());
@@ -155,7 +161,7 @@ export const CustomTable = () => {
 
         if (selectedKeys instanceof Set && selectedKeys.size) {
             toast.promise(
-                fakeDelete(Array.from(selectedKeys)).then((success) => {
+                deleteCategories(Array.from(selectedKeys)).then((success) => {
                     if (success) {
                         setCategories((categories) => categories.filter((c) => !selectedKeys.has(c.id)));
                         setSelectedKeys(new Set());
@@ -227,7 +233,6 @@ export const CustomTable = () => {
                 selectionMode="multiple"
                 onSelectionChange={(keys) => {
                     setSelectedKeys(keys as Set<string>)
-                    console.log(keys)
                 }
                 }
                 className=" pb-4"
