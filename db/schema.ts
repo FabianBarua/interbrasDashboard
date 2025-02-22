@@ -41,17 +41,13 @@ export const ProductTranslation = sqliteTable("product_translation", {
 
 // ------------------------------- Color -------------------------------
 
-// remove column color
 export const Color = sqliteTable("color", {
   id: text().primaryKey().notNull(),
-  color: text()
 });
 
-// remove key column
 export const ColorTranslation = sqliteTable("color_translation", {
   id: int().primaryKey({ autoIncrement: true }).notNull(),
   color_id: text().notNull().references(() => Color.id, {onDelete: 'cascade', onUpdate:'cascade'}).notNull(),
-  key: text(),
   name: text().notNull(),
   lang: text().notNull().references(() => Languages.id, {onDelete: 'cascade', onUpdate:'cascade'}).notNull(),
 });
