@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
       .fullJoin(Photo, eq(Photo.variant_id, Variant.id))
 
       .fullJoin(CategoryTranslation, eq(CategoryTranslation.category_id, Category.id))
-      .fullJoin(ColorTranslation, eq(ColorTranslation.key, Color.color))
+      .fullJoin(ColorTranslation, eq(ColorTranslation.color_id, Color.id))
       .fullJoin(ProductTranslation , eq(ProductTranslation.product_id, Product.id))
       .fullJoin(StatusTranslation, eq(StatusTranslation.status_id, Catalog.status_id))
 
@@ -231,7 +231,7 @@ export async function GET(request: NextRequest) {
     {
       headers: {
         'Cache-Control': 'no-store',
-        'Access-Control-Allow-Origin': origin,
+        'Access-Control-Allow-Origin': origin || '',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type',
       },

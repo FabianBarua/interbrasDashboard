@@ -21,50 +21,12 @@ interface variantRow {
     photo : typeof Photo.$inferSelect
 }
 
-export const CustomTable = ({
-    variants
-}: {
-    variants: variantRow[],
-    categories: typeof Category.$inferSelect[]
-}) => {
-
-    const columns = [
-        { key: 'key', label: 'ID' },
-        { key: 'name', label: 'Nombre' },
-        { key: 'color', label: 'Color' },
-        { key: 'volt', label: 'Voltaje' },
-        { key: 'photo', label: 'Foto' },
-    ];
-
-    const rows = variants.map((product) => ({
-        key: product.variant.id,
-        name: product.product.name,
-        color: product.color.color,
-        volt: product.volt.name || 'No voltaje',
-        photo: product.photo.url
-    }));
-
-    const [loaded, setLoaded] = useState(false);
-    
-    useEffect(() => {
-        setLoaded(
-            (variants.length > 0)
-        );
-    } , [variants]);
-    
-    if (!loaded) {
-        return <div className=" mx-auto my-auto flex gap-2 items-center justify-center">
-            <Loader size={20}  className=" animate-spin text-primary-500 "/> 
-            <p>
-                Cargando
-            </p>
-        </div>;
-    }
+export const CustomTable = () => {
 
 
     return (
         <>
-            <Table aria-label="Example table with dynamic content" className="mt-2">
+            {/* <Table aria-label="Example table with dynamic content" className="mt-2">
                 <TableHeader>
                     {columns.map((column) =>
                         <TableColumn key={column.key}>{column.label}</TableColumn>
@@ -89,7 +51,7 @@ export const CustomTable = ({
                         </TableRow>
                     )}
                 </TableBody>
-            </Table>
+            </Table> */}
             <Button className="mt-4">Save</Button>
         </>
     )

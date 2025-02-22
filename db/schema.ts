@@ -42,13 +42,12 @@ export const ProductTranslation = sqliteTable("product_translation", {
 // ------------------------------- Color -------------------------------
 
 export const Color = sqliteTable("color", {
-  id: int().primaryKey({ autoIncrement: true }).notNull(),
-  color: text().notNull()
+  id: text().primaryKey().notNull(),
 });
 
 export const ColorTranslation = sqliteTable("color_translation", {
   id: int().primaryKey({ autoIncrement: true }).notNull(),
-  key: int().notNull().references(() => Color.color, {onDelete: 'cascade', onUpdate:'cascade'}).notNull(),
+  color_id: text().notNull().references(() => Color.id, {onDelete: 'cascade', onUpdate:'cascade'}).notNull(),
   name: text().notNull(),
   lang: text().notNull().references(() => Languages.id, {onDelete: 'cascade', onUpdate:'cascade'}).notNull(),
 });
@@ -64,10 +63,10 @@ export const Volt = sqliteTable("volt", {
 
 export const Variant = sqliteTable("variant", {
   id: int().primaryKey({ autoIncrement: true }).notNull(),
-  product_id: text().references(() => Product.id, {onDelete: 'cascade', onUpdate:'cascade'}).notNull(),
-  color_id: int().references(() => Color.id, {onDelete: 'set null', onUpdate:'cascade'}),
-  volt_id: int().references(() => Volt.id , {onDelete: 'set null', onUpdate:'cascade'}),
-  catalog_id: int().references(() => Catalog.id, {onDelete: 'set null', onUpdate:'cascade'}),
+  product_id: text().references(() => Product.id).notNull(),
+  volt_id: int().references(() => Volt.id).notNull(),
+  color_id: text().references(() => Color.id, {onDelete: 'set null'}),
+  catalog_id: int().references(() => Catalog.id).notNull(),
 });
 
 // ------------------------------- Catalog -------------------------------

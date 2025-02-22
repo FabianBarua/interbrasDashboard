@@ -7,8 +7,9 @@ import Image from "next/image";
 import { CircleAlert } from "lucide-react";
 import { ROLES } from "@/lib/constants";
 import { NotLoggedScreen } from "@/components/NotLoggedScreen";
+import { Session } from "next-auth";
 
-const LoggedScreen = (session) => {
+const LoggedScreen = (session: Session) => {
 
   const isAdmin = session?.user?.role === ROLES.ADMIN
 
@@ -18,7 +19,9 @@ const LoggedScreen = (session) => {
     <div className=" bg-content1 max-w-80 w-full rounded-2xl mx-auto p-5 flex flex-col gap-5" >
 
       <div className=" w-full flex justify-center items-center ">
-      <Image src={session?.user?.image} height={100} width={100} alt="user image" className=" rounded-2xl" />
+      {
+          session?.user?.image &&
+        <Image src={session?.user?.image} height={100} width={100} alt="user image" className=" rounded-2xl" />}
       </div>
 
 

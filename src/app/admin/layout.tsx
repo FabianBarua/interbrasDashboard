@@ -203,12 +203,12 @@ type AppLayoutProps = {
               </Button>
               <h1 className="text-3xl font-bold leading-9 text-default-foreground">
                 {
-                  keySelected.title
+                  keySelected?.title
                 }
               </h1>
             
                 {
-                  keySelected.key !== 'dashboard' && (
+                  keySelected?.key !== 'dashboard' && (
                     <Button
                       href={
                         isSubMenu ?  undefined : '/admin'

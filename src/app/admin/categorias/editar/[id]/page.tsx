@@ -44,7 +44,7 @@ export default function Page() {
 
     const [originalCategory, setOriginalCategory] = useState<categoryTranslated >(INITIAL_STATE)
     const [category, setCategory] = useState<categoryTranslated>(INITIAL_STATE)
-
+    const [categoryToDelete, setCategoryToDelete] = useState<categoryTranslated | null>(null)
 
     useEffect (() => {
         getData({id, lang:['es', 'pt']}).then((category) => {
@@ -71,7 +71,9 @@ export default function Page() {
     }
 
     const router = useRouter()
-    const handleDelete = async () => {
+
+    const handleDeleteModal = async () => {
+
         toast.promise(deleteCategories(id).then(
             (success)=>{
                 if(success){
@@ -83,6 +85,10 @@ export default function Page() {
             success: "Categoria eliminada",
             error: "Error al eliminar categoria"
         })
+    }
+
+    const handleDelete = () => {
+        setCategoryToDelete(category)
     }
 
     return <div className=" h-full  ">

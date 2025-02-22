@@ -19,7 +19,7 @@
       "esnext"
     ],
     "allowJs": true,
-    "strict": false,
+    "strict": true,
     "noEmit": true,
     "incremental": true,
     "module": "esnext",

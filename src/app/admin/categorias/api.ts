@@ -50,13 +50,17 @@ export const getData = async (params?: {
     )
     .where(and(eq(CategoryTranslation.lang, lang), ...filters));
 
-  return await result;
+  const data = await result;
+  return data.map(item => ({
+    id: item.id || '',
+    name: item.name || '',
+    description: item.description || '',
+    shortDescription: item.shortDescription || ''
+  }));
 };
 
 export const deleteCategories = async (id: string | string[]) => {
   const ids = typeof id === "string" ? [id] : id;
-
-  console.log(ids);
 
   const result = await db.delete(Category).where(inArray(Category.id, ids));
 
@@ -66,10 +70,10 @@ export const deleteCategories = async (id: string | string[]) => {
 export const saveData = async (category: categoryTranslated) => {
   let success = true;
 
-  Object.keys(LANGUAGES).forEach(async (lang) => {
+  for (const lang of Object.keys(LANGUAGES) as (keyof typeof LANGUAGES)[]) {
     const locale = LANGUAGES[lang];
     const data = category[locale].data;
-    data.forEach(async (item) => {
+    for (const item of data) {
       try {
         const result = await db
           .update(CategoryTranslation)
@@ -89,10 +93,8 @@ export const saveData = async (category: categoryTranslated) => {
       } catch (error) {
         success = false;
       }
-
-      return success;
-    });
-  });
+    }
+  }
 
   if (!success) {
     throw new Error("Error al guardar los datos");
@@ -122,7 +124,7 @@ export const addData = async (category: categoryTranslated) => {
     console.log(result);
   }
 
-  for (const lang of Object.keys(LANGUAGES)) {
+  for (const lang of Object.keys(LANGUAGES) as (keyof typeof LANGUAGES)[]) {
     const locale = LANGUAGES[lang];
     const data = category[locale].data;
 

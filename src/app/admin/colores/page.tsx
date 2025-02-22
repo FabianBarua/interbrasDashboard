@@ -1,12 +1,10 @@
-import { Building } from "@/components/ui/Building";
+'use client'
 
+import { CustomTable } from "./tables";
 
-export default function Page() {
-    return (
-      <>
+export default  function Page() {
 
-        <Building />
-
-      </>
-    );
+  return (
+      <CustomTable />
+  );
 }

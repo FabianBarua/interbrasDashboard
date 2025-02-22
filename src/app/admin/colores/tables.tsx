@@ -20,7 +20,6 @@ import {
     Listbox,
     ListboxItem
 } from "@heroui/react";
-import { Category } from "@root/db/schema";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { ChevronDown, CirclePlus, Loader, Pen, Trash } from "lucide-react";
@@ -28,19 +27,20 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
-import { CategoryData, deleteCategories, getData } from "./api";
+import { ColorsData, deleteColors, getData } from "./api";
+import { Color } from "@root/db/schema";
 
-const DeleteCategoryModal = ({ isOpen, onOpenChange, category, onDelete }: any) => {
+export const DeleteColorModal = ({ isOpen, onOpenChange, color, onDelete }: any) => {
     return (
         <Modal isOpen={isOpen} placement="top-center" onOpenChange={onOpenChange}>
             <ModalContent>
                 {(onClose) => (
                     <>
                         <ModalHeader className="flex flex-col gap-1">
-                            <h3>Eliminar categoría</h3>
+                            <h3>Eliminar Color</h3>
                         </ModalHeader>
                         <ModalBody>
-                            <p>¿Estás seguro que deseas eliminar la categoría <strong>{category?.name}</strong>?</p>
+                            <p>¿Estás seguro que deseas eliminar el color <strong>{color?.name_es}</strong>?</p>
                         </ModalBody>
                         <ModalFooter>
                             <Button color="primary" onPress={onClose}>
@@ -57,133 +57,147 @@ const DeleteCategoryModal = ({ isOpen, onOpenChange, category, onDelete }: any) 
     );
 };
 
-
 export const CustomTable = () => {
 
-    const [categories, setCategories] = useState<CategoryData[]>([])
+    const [selectedKeys, setSelectedKeys] = useState<Set<any> | 'all'>(new Set<any>());
+    const router = useRouter();
 
-    const updateCategories = ()=>{getData().then((data) => {
-        setCategories(data) 
-        console.log(data)
-    })}
+    const columns = [
+        {
+            key: 'id',
+            label: 'ID'
+        },
+        {
+            key: 'name_es',
+            label: 'Nombre - ES'
+        },
+        {
+            key: 'name_pt',
+            label: 'Nombre - PT'
+        },
+        {
+            key: 'actions',
+            label: 'Acciones'
+        }
+    ]
+
+    const [colors, setColors] = useState<ColorsData[] | null>(null)
+    const [colorToDelete, setColorToDelete] = useState<typeof Color.$inferSelect | null>(null)
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
+    const handleDelete = useCallback(async (onClose: () => void) => {
+            if (colorToDelete) {
+                toast.promise(
+                    deleteColors(colorToDelete.id).then((success) => {
+                        if (success) {
+                            setColors((categories) => categories ? categories.filter((c) => c.id !== colorToDelete.id) : null);
+                            setSelectedKeys((prev) => new Set([...prev].filter((key) => key !== colorToDelete.id)));
+                            setColorToDelete(null);
+                            onClose();
+                        }
+                    }),
+                    {
+                        loading: 'Borrando color',
+                        success: 'Color borrada',
+                        error: 'Error borrando el color'
+                    }
+                );
+            }
+        }, [colorToDelete]);
+
+    const updateColors = ()=>{
+        getData().then((data) => {
+        setColors(data)
+    })
+    }
 
     useEffect(() => {
-        updateCategories()
-        console.log('useEffect')
+        updateColors()
     }, [])
+
 
     const [search, setSearch] = useState('')
 
-    const categoriesFiltered = useMemo(() => categories.filter((category) => {
-        return category.name?.toLowerCase().includes(search.toLowerCase());
-    }), [categories, search])
+    const colorsFiltered = useMemo(() => colors?.filter((color) => {
+        return color.name_es?.toLowerCase().includes(search.toLowerCase()) || color.name_pt?.toLowerCase().includes(search.toLowerCase())
+    }), [colors, search])
 
-    const columns = [
-        { key: 'id', label: 'ID' },
-        { key: 'name', label: 'Nombre' },
-        { key: 'description', label: 'Descripción' },
-        { key: 'shortDescription', label: 'Descripción corta' },
-        { key: 'actions', label: 'Acciones' }
-    ];
-
-    const router = useRouter()
-    const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const [categoryToDelete, setCategoryToDelete] = useState<typeof Category.$inferSelect | null>(null)
-
-    const handleOpenDelete = useCallback((category: typeof Category.$inferSelect) => {
-        setCategoryToDelete(category);
+    const handleOpenDelete = useCallback((color: ColorsData) => {
+        setColorToDelete(color);
         onOpen();
-    }, [onOpen]);
-
-    const handleDelete = useCallback(async (onClose: () => void) => {
-        if (categoryToDelete) {
-            toast.promise(
-                deleteCategories(categoryToDelete.id).then((success) => {
-                    if (success) {
-                        setCategories((categories) => categories.filter((c) => c.id !== categoryToDelete.id));
-                        setSelectedKeys((prev) => new Set([...prev].filter((key) => key !== categoryToDelete.id)));
-                        setCategoryToDelete(null);
-                        onClose();
-                    }
-                }),
-                {
-                    loading: 'Borrando categoría',
-                    success: 'Categoría borrada',
-                    error: 'Error borrando la categoría'
-                }
-            );
-        }
-    }, [categoryToDelete]);
-
-    const [selectedKeys, setSelectedKeys] = useState<Set<any> | 'all'>(new Set<any>());
+    } , [onOpen]);
 
     const [loaded, setLoaded] = useState(false);
 
     const firstRender = useRef(true);
     
     useEffect(() => {
-        if (firstRender.current && categories.length) {
+        if (firstRender.current && colors!== null) {
             setLoaded(true);
             firstRender.current = false;
         }
-    }, [categories]);
+    }, [colors]);
 
     if (!loaded) {
         return <div className=" mx-auto my-auto flex gap-2 items-center justify-center">
-            <Loader size={20} className=" animate-spin text-primary-500 " />
+            <Loader size={20} className="animate-spin text-primary-500 " />
             <p>
                 Cargando
             </p>
         </div>;
     }
 
-    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { value } = e.target;
-        setSearch(value);
-    }
 
-    const bulkDelete = async () => {
-        if (selectedKeys === 'all') {
-            toast.promise(
-                deleteCategories(
-                    categories.map((category) => category.id)
-                ).then((success) => {
-                    if (success) {
-                        setCategories([]);
-                        setSelectedKeys(new Set());
-                    }
-                }),
-                {
-                    loading: 'Borrando categorías',
-                    success: 'Categorías borradas',
-                    error: 'Error borrando las categorías'
-                }
-            )
+        const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+            const { value } = e.target;
+            setSearch(value);
         }
-
-        if (selectedKeys instanceof Set && selectedKeys.size) {
-            toast.promise(
-                deleteCategories(Array.from(selectedKeys)).then((success) => {
-                    if (success) {
-                        setCategories((categories) => categories.filter((c) => !selectedKeys.has(c.id)));
-                        setSelectedKeys(new Set());
+    
+        const bulkDelete = async () => {
+            if (selectedKeys === 'all') {
+                toast.promise(
+                    deleteColors(colors?.map((color) => color.id) || []).then(
+                        () => {
+                            updateColors()
+                            setSelectedKeys(new Set())
+                        }
+                    )
+                    ,
+                    {
+                        loading: 'Borrando colores',
+                        success: 'Colores borradas',
+                        error: 'Error borrando los colores'
                     }
-                }),
-                {
-                    loading: 'Borrando categorías',
-                    success: 'Categorías borradas',
-                    error: 'Error borrando las categorías'
-                }
-            )
-
-    }
-    }
+                )
+            }
+    
+            if (selectedKeys instanceof Set && selectedKeys.size) {
+                toast.promise(
+                    deleteColors(Array.from(selectedKeys)).then(
+                        () => {
+                            updateColors()
+                            setSelectedKeys(new Set())
+                        }
+                    )
+                        ,
+                    {
+                        loading: 'Borrando Colores',
+                        success: 'Colores borrados',
+                        error: 'Error borrando los colores'
+                    }
+                )
+    
+        }
+        }
 
     return (
         <>
-            <DeleteCategoryModal isOpen={isOpen} onOpenChange={onOpenChange} category={categoryToDelete} onDelete={handleDelete} />
-            <div className="w-full flex justify-between items-end my-4">
-                <Input className="max-w-xs" label="Buscar" labelPlacement="outside" placeholder="Buscar categoría"
+
+        <DeleteColorModal isOpen={isOpen} onOpenChange={onOpenChange} color={colorToDelete} onDelete={handleDelete} />
+
+
+        <div className="w-full flex justify-between items-end my-4">
+                <Input className="max-w-xs" label="Buscar" labelPlacement="outside" placeholder="Buscar colores"
                     onChange={handleSearch}
                 />
 
@@ -223,12 +237,13 @@ export const CustomTable = () => {
                     )
                     }
 
-                    <Button as={Link} href="/admin/categorias/agregar" className="max-w-min" variant="flat">
+                    <Button as={Link} href="/admin/colores/agregar" className="max-w-min" variant="flat">
                         <CirclePlus className="mr-2" size={20} />
-                        Agregar categoría
+                        Agregar color
                     </Button>
                 </div>
-            </div>
+        </div>
+
             <Table
                 aria-label="Product table"
                 selectedKeys={selectedKeys}
@@ -243,17 +258,16 @@ export const CustomTable = () => {
                     {columns.map((column) => <TableColumn key={column.key}>{column.label}</TableColumn>)}
                 </TableHeader>
                 <TableBody>
-                    {categoriesFiltered.map((row) => (
+                    {(colorsFiltered|| []).map((row) => (
                         <TableRow key={row.id}>
                             <TableCell>{row.id}</TableCell>
-                            <TableCell>{row.name}</TableCell>
-                            <TableCell>{row.description}</TableCell>
-                            <TableCell>{row.shortDescription}</TableCell>
+                            <TableCell>{row.name_es}</TableCell>
+                            <TableCell>{row.name_pt}</TableCell>
                             <TableCell className="gap-2 flex">
                                 <Button size="sm" isIconOnly variant="light" onPress={() => handleOpenDelete(row)}>
                                     <Trash className="text-default-400" size={20} />
                                 </Button>
-                                <Button as={Link} href={`/admin/categorias/editar/${row.id}`} size="sm" isIconOnly variant="light">
+                                <Button size="sm" isIconOnly variant="light" as={Link} href={`/admin/colores/editar/${row.id}`}>
                                     <Pen className="text-default-400" size={20} />
                                 </Button>
                             </TableCell>
