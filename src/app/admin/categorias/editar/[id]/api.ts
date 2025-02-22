@@ -1,19 +1,19 @@
 "use server";
 import { db } from "@root/db/config";
 import { Category, CategoryTranslation } from "@root/db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, SQL } from "drizzle-orm";
 import { categoryTranslated } from "../../api";
 
 
 
 export const getData = async (params?: { id?: string; lang?: string[] }) => {
-  const filters = [];
+  const filters: SQL<unknown>[] = [];
 
   if (params?.id) {
     filters.push(eq(Category.id, params.id));
   }
 
-  const LANGS = typeof params?.lang === "string" ? [params.lang] : params?.lang;
+  const LANGS = typeof params?.lang === "string" ? [params.lang] : params?.lang || [];
 
   const data = await Promise.all(
     LANGS.map(async (lang) => {
@@ -40,6 +40,7 @@ export const getData = async (params?: { id?: string; lang?: string[] }) => {
   );
 
   const result: categoryTranslated = data.reduce((acc, curr) => {
+    // @ts-ignore
     acc[curr.lang] = curr;
     return acc;
   }, {} as categoryTranslated);

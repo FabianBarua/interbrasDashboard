@@ -125,10 +125,10 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
       [isCompact, hideEndContent, iconClassName] 
     );
 
-    const [selectedKeys, setSelectedKeys] = React.useState(new Set([keySelected.key]));
+    const [selectedKeys, setSelectedKeys] = React.useState(new Set([keySelected?.key ?? ""]));
   
     useEffect(() => {
-      setSelectedKeys(new Set([keySelected.key]));
+      setSelectedKeys(new Set([keySelected?.key ?? ""]));
     } , [keySelected]);
 
     return (
@@ -140,8 +140,8 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
         key={isCompact ? `compact-${customLabel}` :`default-${customLabel}` }
 
         onSelectionChange={
-          (keys: Set<string>) => {
-            setSelectedKeys(keys);
+          (keys: any) => {
+            setSelectedKeys(new Set(keys));
           }
         }
         

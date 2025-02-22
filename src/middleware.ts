@@ -1,9 +1,9 @@
 import {PUBLIC_ROUTES, LOGIN, ROOT, PROTECTED_SUB_ROUTES} from "@/lib/routes";
 import { auth } from "@/auth";
+import type { NextRequest } from "next/server";
 
 
-
-export async function middleware(request) {
+export async function middleware(request: NextRequest) {
   const { nextUrl } = request;
 
   const session = await auth();

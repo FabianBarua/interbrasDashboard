@@ -10,7 +10,7 @@ export const LoginPage = function Component() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
 
-  const handleAction = async (e) => {
+  const handleAction = async (e: { get: (arg0: string) => any; }) => {
     const action = e.get('action');
     if (!action) {
       console.error('No action selected');

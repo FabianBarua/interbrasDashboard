@@ -14,7 +14,7 @@ export default function Page() {
 
     const router = useRouter()
 
-    const onSubmit = (e) => {
+    const onSubmit = (e: { preventDefault: () => void; currentTarget: HTMLFormElement | undefined }) => {
         e.preventDefault();
     
         const data = Object.fromEntries(new FormData(e.currentTarget));
