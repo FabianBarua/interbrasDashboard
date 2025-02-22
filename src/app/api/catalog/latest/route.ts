@@ -33,7 +33,7 @@ interface GroupedByCategory {
   };
 }
 
-const allowedOrigins = ['https://interbrasoficial.com', 'http://localhost:4321'];
+const allowedOrigins = ['https://interbrasoficial.com', 'http://localhost:4321', 'http://localhost:3000'];
 
 
 export async function GET(request: NextRequest) {
