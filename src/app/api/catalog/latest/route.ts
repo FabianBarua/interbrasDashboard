@@ -1,6 +1,6 @@
 import { db } from '@root/db/config';
-import { Catalog, Variant, Product, Volt, Color, Category, Photo } from '@root/db/schema';
-import { eq, and, min } from 'drizzle-orm';
+import { Catalog, Variant, Product, Volt, Color, Category, Photo, Promotion, PromotionType } from '@root/db/schema';
+import { eq, and, min, not } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface ProductInfo {
@@ -22,6 +22,10 @@ interface ProductData {
   originalName: string;
   info: ProductInfo;
   photo: string | undefined;
+  promotion: {
+    type: any;
+    data: any;
+  };
 }
 
 interface GroupedByCategory {
@@ -38,47 +42,51 @@ const allowedOrigins = ['https://interbrasoficial.com', 'http://localhost:4321',
 
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
-    const currentLocale  = searchParams.getAll('lang') || 'es';
+    const showOnlyPromos = searchParams.has("ofertas");
 
     const origin = request.headers.get('Origin');
-
     if (!allowedOrigins.includes(origin)) {
-      return NextResponse.json({ message: 'Origin not allowed' }, { status: 403 });
+      //return NextResponse.json({ message: 'Origin not allowed' }, { status: 403 });
     }
 
     const t = (key: string) => key;
     const t_catalog = (key: string) => key;
 
-    const catalog = await db
-      .select()
-      .from(Catalog)
-      .fullJoin(Variant, eq(Variant.catalog_id, Catalog.id))
-      .fullJoin(Product, eq(Product.id, Variant.product_id))
-      .fullJoin(Volt, eq(Volt.id, Variant.volt_id))
-      .fullJoin(Color, eq(Color.id, Variant.color_id))
-      .fullJoin(Category, eq(Category.id, Product.category_id))
-      .fullJoin(Photo, eq(Photo.variant_id, Variant.id))
-      .where(
-        and(
-          eq(
-            Photo.order,
-            db
-              .select({ order: min(Photo.order) })
-              .from(Photo)
-              .where(eq(Photo.variant_id, Variant.id))
-          )
-        )
-      );
+const catalog = await db
+  .select()
+  .from(Catalog)
+  .fullJoin(Variant, eq(Variant.catalog_id, Catalog.id))
+  .fullJoin(Product, eq(Product.id, Variant.product_id))
+  .fullJoin(Volt, eq(Volt.id, Variant.volt_id))
+  .fullJoin(Color, eq(Color.id, Variant.color_id))
+  .fullJoin(Category, eq(Category.id, Product.category_id))
+  .fullJoin(Photo, eq(Photo.variant_id, Variant.id))
+  .fullJoin(Promotion, eq(Promotion.catalog_id, Catalog.id))
+  .fullJoin(PromotionType, eq(PromotionType.id, Promotion.type_id))
+  .where(
+    and(
+      eq(
+        Photo.order,
+        db
+          .select({ order: min(Photo.order) })
+          .from(Photo)
+          .where(eq(Photo.variant_id, Variant.id))
+      ),
+      ...(showOnlyPromos
+        ? [eq(Promotion.active, true)]
+        : [])
+    ));
     
 
     
     const groupedByCategory: GroupedByCategory = {};
-    
+
     catalog.forEach((item) => {
+      console.log(item);
       if (!item.catalog?.show) {
         return;
       }
-    
+
       const categoryID = item?.category?.id || "noCategory";
     
       const CategoryName = item?.category?.name
@@ -122,6 +130,10 @@ export async function GET(request: NextRequest) {
         productCode: item?.product?.id || null,
         name,
         price: price.toString(),
+        promotion: {
+          type: item?.promotion_type,
+          data: item?.promotion
+        },
         color,
         show,
         productPerBox: item.catalog?.productPerBox || 1,
