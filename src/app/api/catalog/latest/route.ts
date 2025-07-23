@@ -25,7 +25,7 @@ interface ProductData {
   promotion: {
     type: any;
     data: any;
-  };
+  } | null;
 }
 
 interface GroupedByCategory {
@@ -130,10 +130,9 @@ const catalog = await db
         productCode: item?.product?.id || null,
         name,
         price: price.toString(),
-        promotion: {
-          type: item?.promotion_type,
-          data: item?.promotion
-        },
+        promotion: 
+        (item?.promotion && item?.promotion.active ) ? { type: item?.promotion_type, data: item?.promotion } : null
+        ,
         color,
         show,
         productPerBox: item.catalog?.productPerBox || 1,
