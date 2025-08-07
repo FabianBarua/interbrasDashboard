@@ -44,6 +44,9 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const showOnlyPromos = searchParams.has("ofertas");
 
+    // los que son show 0 es porque no tienen stock
+    const showWithoutStock =  searchParams.has("show_hidden") && searchParams.get("show_hidden") === "true";
+
     const origin = request.headers.get('Origin');
     if (!allowedOrigins.includes(origin)) {
       //return NextResponse.json({ message: 'Origin not allowed' }, { status: 403 });
@@ -83,10 +86,15 @@ const catalog = await db
 
     catalog.forEach((item) => {
       console.log(item);
-      if (!item.catalog?.show) {
-        return;
+
+      if (!item?.catalog || !item?.product || !item?.category) {
+        return; // Skip items that do not have the necessary data
       }
 
+      if (!showWithoutStock && !item?.catalog?.show) {
+        return; // Skip items that are not shown
+      }
+      
       const categoryID = item?.category?.id || "noCategory";
     
       const CategoryName = item?.category?.name
