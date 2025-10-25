@@ -27,7 +27,7 @@ async function makeAdmin() {
     // Actualizar el rol a admin
     await db
       .update(Users)
-      .set({ role: "admin" as any })
+      .set({ role: "admin" } as any)
       .where(eq(Users.email, email));
 
     console.log("✅ Usuario actualizado exitosamente");

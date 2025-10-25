@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getUsers, changeUserRole } from "@/app/actions/users";
+import { getAllUsersAction, updateUserAction } from "@/app/actions/users";
 import { toast } from "sonner";
 
 type User = {
@@ -22,27 +22,31 @@ export function UserManagement() {
 
   async function loadUsers() {
     setLoading(true);
-    const result = await getUsers();
+    const result = await getAllUsersAction();
     
-    if (result.error) {
-      toast.error(result.error);
-    } else if (result.users) {
+    if (result.success && result.users) {
       setUsers(result.users as User[]);
+    } else {
+      toast.error(result.error || "Error al cargar usuarios");
     }
     
     setLoading(false);
   }
 
-  async function handleRoleChange(userId: string, currentRole: string) {
+  async function handleRoleChange(userId: string, currentRole: string, userName: string, userEmail: string) {
     const newRole = currentRole === 'admin' ? 'user' : 'admin';
     
-    const result = await changeUserRole(userId, newRole);
+    const result = await updateUserAction(userId, {
+      name: userName || "",
+      email: userEmail,
+      role: newRole as "user" | "admin"
+    });
     
-    if (result.error) {
-      toast.error(result.error);
-    } else {
-      toast.success(`Rol actualizado a ${newRole}`);
+    if (result.success) {
+      toast.success(result.message || `Rol actualizado a ${newRole}`);
       await loadUsers(); // Recargar la lista
+    } else {
+      toast.error(result.error || "Error al cambiar rol");
     }
   }
 
@@ -82,7 +86,7 @@ export function UserManagement() {
                 </td>
                 <td className="px-4 py-2 border">
                   <button
-                    onClick={() => handleRoleChange(user.id, user.role)}
+                    onClick={() => handleRoleChange(user.id, user.role, user.name || "", user.email)}
                     className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
                   >
                     Cambiar a {user.role === 'admin' ? 'User' : 'Admin'}

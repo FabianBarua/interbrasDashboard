@@ -18,7 +18,7 @@ export const {
         accountsTable: Accounts,
         sessionsTable: Sessions,
         verificationTokensTable: VerificationTokens,
-    }),
+    }) as any,
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID,

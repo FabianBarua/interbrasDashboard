@@ -36,7 +36,7 @@ export async function getUserById(id: string) {
 export async function updateUserRole(userId: string, role: Role) {
   const [updated] = await db
     .update(Users)
-    .set({ role: role as any })
+    .set({ role } as any)
     .where(eq(Users.id, userId))
     .returning();
   
