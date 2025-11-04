@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
     .fullJoin(Volt, eq(Volt.id, Variant.volt_id))
     .fullJoin(Color, eq(Color.id, Variant.color_id))
     .fullJoin(Category, eq(Category.id, Product.category_id))
-    .fullJoin(Photo, eq(Photo.variant_id, Variant.id))
+    .innerJoin(Photo, eq(Photo.variant_id, Variant.id))
     .fullJoin(
       Promotion,
       and(
