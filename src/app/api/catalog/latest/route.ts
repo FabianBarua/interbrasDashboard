@@ -170,7 +170,7 @@ export async function GET(request: NextRequest) {
   // ===============================
   // 🗂️ ORDEN DE CATEGORÍAS
   // ===============================
-  const categoryOrder = ['tvs', 'aires', 'scooters', 'hoverboards', 'triciclos', 'airfryer'];
+  const categoryOrder = ['tvs', 'aires', 'hoverboards', 'scooters', 'triciclos', 'airfryer'];
 
   const orderedProducts: GroupedByCategory = {
     ...categoryOrder.reduce((acc: GroupedByCategory, category: string) => {
